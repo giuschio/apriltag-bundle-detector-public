@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "apriltag-bundle-detector"
+version = "0.0.0"
+description = "AprilTag bundle pose estimation utilities."
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+  "numpy",
+  "opencv-python",
+  "pyapriltags",
+  "PyYAML",
+  "scipy",
+]
+
+[project.optional-dependencies]
+realsense = ["pyrealsense2"]
+
+[tool.setuptools]
+packages = ["apriltag_bundle_detector"]
