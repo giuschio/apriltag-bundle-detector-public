@@ -76,8 +76,8 @@ def _visualize_with_labels(bundle_name, geometries, labels):
 
 def main():
     parser = argparse.ArgumentParser(description="Visualize bundle and tag frames with Open3D.")
-    parser.add_argument("--yaml_path", default="assets/config_cube.yaml", help="Path to bundle YAML config.")
-    parser.add_argument("--bundle_name", default="cube", help="Bundle name to visualize.")
+    parser.add_argument("--yaml_path", default="assets/config_workspace.yaml", help="Path to bundle YAML config.")
+    parser.add_argument("--bundle_name", default="workspace", help="Bundle name to visualize.")
     args = parser.parse_args()
 
     bundles = _load_bundles(args.yaml_path)

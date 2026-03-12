@@ -73,7 +73,7 @@ def main():
     )
     args = parser.parse_args()
 
-    config_path = 'assets/config_cube.yaml'
+    config_path = 'assets/config_workspace.yaml'
     if not os.path.exists(config_path):
         raise FileNotFoundError(config_path)
 

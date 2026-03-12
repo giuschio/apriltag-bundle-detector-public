@@ -18,6 +18,14 @@ class TagConfig(TypedDict):
 
 
 class AprilTagBundleDetector:
+    """Detect configured AprilTag bundles and estimate bundle poses in camera frame.
+
+    Pose convention used throughout this class:
+    - `T_bundle_tag` maps points from each tag frame into the bundle frame.
+    - Solved bundle poses map points from bundle frame into camera frame
+      (`T_camera_bundle`, i.e. bundle -> camera).
+    """
+
     def __init__(
         self,
         yaml_path: str,
@@ -57,6 +65,18 @@ class AprilTagBundleDetector:
     def __call__(
         self, image: NDArray[np.uint8], debug: bool = False
     ) -> Dict[str, Transform]:
+        """Run AprilTag detection and return per-bundle camera-frame poses.
+
+        Args:
+            image: Input grayscale image as `uint8` array.
+            debug: If `True`, print timing and warning messages.
+
+        Returns:
+            `Dict[str, Transform]`: Mapping from bundle name to pose transform
+            from bundle coordinates to camera coordinates (`T_camera_bundle`,
+            bundle -> camera). If a bundle cannot be localized in the current
+            frame, the most recent valid transform for that bundle is returned.
+        """
         start = time()
         detections = self.detector.detect(image)
         detection_time = time()
@@ -93,6 +113,7 @@ class AprilTagBundleDetector:
         img_pts: NDArray[np.float32],
         tag_slices: Sequence[Tuple[int, int]],
     ) -> Optional[Transform]:
+        """Solve PnP for the bundle and return `T_camera_bundle` (bundle -> camera)."""
         # Initial solve
         ok, rvec, tvec = cv2.solvePnP(
             obj_pts,
