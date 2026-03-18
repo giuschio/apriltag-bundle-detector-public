@@ -56,12 +56,6 @@ class AprilTagBundleDetector:
         self.tag_family: str = resolved_family
         self.detector = Detector(families=resolved_family)
 
-        self.last_transforms: Dict[str, Transform] = {
-            name: Transform.identity() for name in self.bundles
-        }
-
-    # ---------------------------------------------------------
-
     def __call__(
         self, image: NDArray[np.uint8], debug: bool = False
     ) -> Dict[str, Transform]:
@@ -74,8 +68,8 @@ class AprilTagBundleDetector:
         Returns:
             `Dict[str, Transform]`: Mapping from bundle name to pose transform
             from bundle coordinates to camera coordinates (`T_camera_bundle`,
-            bundle -> camera). If a bundle cannot be localized in the current
-            frame, the most recent valid transform for that bundle is returned.
+            bundle -> camera). Bundles that cannot be localized in the current
+            frame are omitted from the result.
         """
         start = time()
         detections = self.detector.detect(image)
@@ -89,17 +83,14 @@ class AprilTagBundleDetector:
 
             if len(tag_slices) < self.min_tags:
                 if debug: print(f"{time()} Warning: failed to localize bundle '{bundle_name}': tags out of view")
-                results[bundle_name] = self.last_transforms[bundle_name]
                 continue
 
             T = self._solve_bundle_pnp(obj_pts, img_pts, tag_slices)
 
             if T is not None:
-                self.last_transforms[bundle_name] = T
+                results[bundle_name] = T
             else:
                 if debug: print(f"{time()} Warning: failed to localize bundle '{bundle_name}': could not solve PnP")
-
-            results[bundle_name] = self.last_transforms[bundle_name]
 
         if debug: print(f"Detection done in {((detection_time-start)*1000):.2f}ms full call in {((time()-start)*1000):.2f}ms")
 
