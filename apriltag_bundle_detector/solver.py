@@ -62,7 +62,7 @@ class AprilTagBundleDetector:
         """Run AprilTag detection and return per-bundle camera-frame poses.
 
         Args:
-            image: Input grayscale image as `uint8` array.
+            image: Input `uint8` grayscale image, or BGR/RGB color image.
             debug: If `True`, print timing and warning messages.
 
         Returns:
@@ -72,6 +72,7 @@ class AprilTagBundleDetector:
             frame are omitted from the result.
         """
         start = time()
+        image = self._as_grayscale(image)
         detections = self.detector.detect(image)
         detection_time = time()
         results: Dict[str, Transform] = {}
@@ -95,6 +96,22 @@ class AprilTagBundleDetector:
         if debug: print(f"Detection done in {((detection_time-start)*1000):.2f}ms full call in {((time()-start)*1000):.2f}ms")
 
         return results
+
+    # ---------------------------------------------------------
+
+    @staticmethod
+    def _as_grayscale(image: NDArray[np.uint8]) -> NDArray[np.uint8]:
+        """Return a grayscale image suitable for pyapriltags detection."""
+        if image.ndim == 2:
+            return image
+        if image.ndim == 3 and image.shape[2] == 3:
+            return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        if image.ndim == 3 and image.shape[2] == 4:
+            return cv2.cvtColor(image, cv2.COLOR_BGRA2GRAY)
+        raise ValueError(
+            "AprilTagBundleDetector expected a grayscale image or a 3/4-channel "
+            f"color image, got shape {image.shape}."
+        )
 
     # ---------------------------------------------------------
 
